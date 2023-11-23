@@ -31,6 +31,50 @@ namespace TrilhaApiDesafio.Controllers
             return Ok(tarefas);
         }
 
+        [HttpGet("proximasTarefasPendentes")]
+        public IActionResult ProximasTarefasPendentes()
+        {                                
+            DateTime exatamenteAgora = DateTime.Now;
+            var tarefas = _context.Tarefas.Where(x => x.Data > exatamenteAgora)
+                                            .Where(x => x.Status == EnumStatusTarefa.Pendente)
+                                            .OrderBy(x => x.Data);
+            return Ok(tarefas);
+        }
+
+        [HttpGet("ProximasTarefasFinalizadas")]
+        public IActionResult ProximasTarefasFinalizadas()
+        {                                
+            DateTime exatamenteAgora = DateTime.Now;
+            var tarefas = _context.Tarefas.Where(x => x.Data > exatamenteAgora)
+                                            .Where(x => x.Status == EnumStatusTarefa.Finalizado)
+                                            .OrderBy(x => x.Data);
+            return Ok(tarefas);
+        }
+
+        [HttpGet("Resumo")]
+        public IActionResult ResumoTarefas()
+        {                                
+            DateTime exatamenteAgora = DateTime.Now;
+            int QtdTarefasPendentesPassado = _context.Tarefas.Where(x => x.Data < exatamenteAgora)
+                                            .Where(x => x.Status == EnumStatusTarefa.Pendente)
+                                            .Count();
+            int QtdTarefasPendentesFuturo = _context.Tarefas.Where(x => x.Data >= exatamenteAgora)
+                                            .Where(x => x.Status == EnumStatusTarefa.Pendente)
+                                            .Count();
+            int QtdTarefasFinalizadasPassado = _context.Tarefas.Where(x => x.Data < exatamenteAgora)
+                                            .Where(x => x.Status == EnumStatusTarefa.Finalizado)
+                                            .Count();
+            int QtdTarefasFinalizadasFuturo = _context.Tarefas.Where(x => x.Data >= exatamenteAgora)
+                                            .Where(x => x.Status == EnumStatusTarefa.Finalizado)
+                                            .Count();
+
+            
+            var resumo = new { TarefasPendentes =  new { Total = QtdTarefasPendentesPassado + QtdTarefasPendentesFuturo, Passado = QtdTarefasPendentesPassado, Futuro = QtdTarefasPendentesFuturo },
+                                TarefasFinalizadas = new { Total = QtdTarefasFinalizadasPassado + QtdTarefasFinalizadasFuturo, Passado = QtdTarefasFinalizadasPassado, Futuro = QtdTarefasFinalizadasFuturo }
+                            };                                            
+            return Ok(resumo);
+        }
+
         [HttpGet("ObterPorTitulo")]
         public IActionResult ObterPorTitulo(string titulo)
         {
